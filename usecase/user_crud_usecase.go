@@ -56,6 +56,11 @@ func (u *userCrudUsecase) InsertNewUser(name, email, role string) error {
 	}
 
 	newId := userIdGenerator()
+	for _, u := range users {
+		if u.UserId == newId {
+			newId = userIdGenerator()
+		}
+	}
 	var inputRole model.Role
 	roles, err := u.roleRepo.FindAllBy(map[string]interface{}{})
 	for _, v := range roles {
@@ -70,11 +75,6 @@ func (u *userCrudUsecase) InsertNewUser(name, email, role string) error {
 		return err
 	}
 
-	for _, u := range users {
-		if u.UserId == newId {
-			newId = userIdGenerator()
-		}
-	}
 	newUser := model.User{
 		UserId:    newId,
 		Email:     email,
@@ -103,6 +103,11 @@ func (u *userCrudUsecase) InsertNewUserAsPic(name, email, role string, departmen
 	}
 
 	newId := userIdGenerator()
+	for _, u := range users {
+		if u.UserId == newId {
+			newId = userIdGenerator()
+		}
+	}
 	var inputRole model.Role
 	var inputDep model.PicDepartment
 	roles, err := u.roleRepo.FindAllBy(map[string]interface{}{})
@@ -129,11 +134,6 @@ func (u *userCrudUsecase) InsertNewUserAsPic(name, email, role string, departmen
 	newUserRole := model.UserRole{UserId: newId, RoleId: inputRole.Id}
 	newPic := model.Pic{RoleId: inputRole.Id, UserId: newId, DepartmentId: inputDep.Id}
 
-	for _, u := range users {
-		if u.UserId == newId {
-			newId = userIdGenerator()
-		}
-	}
 	newUser := model.User{
 		UserId:    newId,
 		Email:     email,
