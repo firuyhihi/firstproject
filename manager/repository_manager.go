@@ -12,6 +12,7 @@ type RepositoryManager interface {
 	PicDepartmentRepository() repository.PicDepartmentRepository
 	UserRoleRepository() repository.UserRoleRepository
 	RoleRepository() repository.RoleRepository
+	TicketRepo() repository.TicketRepository
 }
 
 func (r *repositoryManager) UserRepository() repository.UserRepository {
@@ -28,6 +29,10 @@ func (r *repositoryManager) RoleRepository() repository.RoleRepository {
 }
 func (r *repositoryManager) PicDepartmentRepository() repository.PicDepartmentRepository {
 	return repository.InitPicDepartmentRepository(r.infra.SqlDb())
+}
+
+func (r *repositoryManager) TicketRepo() repository.TicketRepository {
+	return repository.NewTicketRepository(r.infra.SqlDb())
 }
 
 func InitRepositoryManager(infra Infra) RepositoryManager {

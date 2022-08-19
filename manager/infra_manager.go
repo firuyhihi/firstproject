@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"ticket.narindo.com/config"
+	"ticket.narindo.com/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -31,6 +32,16 @@ func InitInfra(config *config.Config) Infra {
 
 func initDbResource(dataSourceName string) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dataSourceName), &gorm.Config{})
+	db.AutoMigrate(
+		&model.User{},
+		&model.Role{},
+		&model.UserRole{},
+		&model.Priority{},
+		&model.Status{},
+		&model.PicDepartment{},
+		&model.Pic{},
+		&model.Ticket{},
+	)
 	if err != nil {
 		return nil, err
 	}

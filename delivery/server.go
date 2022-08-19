@@ -42,6 +42,7 @@ func (a *appServer) Run() {
 }
 
 func (a *appServer) initControllers() {
+	controller.NewTicketController(a.engine, a.usecManager.TicketUseCase())
 	controller.InitUserCrudController(a.engine, a.usecManager)
 }
 
