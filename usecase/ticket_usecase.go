@@ -52,9 +52,19 @@ func (t *ticketUseCase) CreateTicket(ticket *model.Ticket) error {
 		return errors.New("create failed, departement not found")
 	} //tambahin cek
 
-	status, _ := t.repo.FindAllBy(map[string]interface{}{"statusId": ticket.StatusId})
+	status, _ := t.repo.FindAllBy(map[string]interface{}{"id": ticket.StatusId})
 	if len(status) == 0 {
 		return errors.New("create failed, status not found")
+	}
+
+	csId, _ := t.repo.FindAllBy(map[string]interface{}{"id": ticket.CsId})
+	if len(csId) == 0 {
+		return errors.New("create failed, cs id not found")
+	}
+
+	priority, _ := t.repo.FindAllBy(map[string]interface{}{"id": ticket.PriorityId})
+	if len(priority) == 0 {
+		return errors.New("create failed, priority not found")
 	}
 
 	var newTicketId = utils.GenerateId(department[0].DepartmentName)
