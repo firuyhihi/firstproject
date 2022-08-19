@@ -34,7 +34,6 @@ type ticketUseCase struct {
 	repoPic  repository.PicRepository
 }
 
-// ListByDepartment implements TicketUseCase
 func (t *ticketUseCase) ListByDepartment(departmentId int) ([]model.Ticket, error) {
 	ticketList, err := t.repo.FindAllBy(map[string]interface{}{"department_id": departmentId, "status_id": 1})
 		if err != nil {
@@ -47,11 +46,16 @@ func (t *ticketUseCase) CreateTicket(ticket *model.Ticket) error {
 	if ticket.CsId == "" || ticket.DepartmentId == 0 || ticket.TicketSubject == "" || ticket.TicketMessage == "" {
 		return errors.New("create failed, missing required field")
 	}
-
+	// status, cs, priority
 	department, _ := t.repoDept.FindAllBy(map[string]interface{}{"id": ticket.DepartmentId})
 	if len(department) == 0 {
 		return errors.New("create failed, departement not found")
 	} //tambahin cek
+
+	status, _ := t.repo.FindAllBy(map[string]interface{}{"statusId": ticket.StatusId})
+	if len(status) == 0 {
+		return errors.New("create failed, status not found")
+	}
 
 	var newTicketId = utils.GenerateId(department[0].DepartmentName)
 	ticket.TicketId = newTicketId

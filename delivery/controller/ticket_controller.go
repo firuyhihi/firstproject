@@ -314,7 +314,7 @@ func NewTicketController(router *gin.Engine, ucTicket usecase.TicketUseCase) *Ti
 
 	protectedGroup.POST("", controller.createTicket)
 	protectedGroup.GET("/list", controller.ListTicketByUserId)
-	protectedGroup.GET("/list/department/:id", controller.ListTicketByDepartmentId)
+	protectedGroup.GET("/department/:id", controller.ListTicketByDepartmentId)
 
 	// protectedGroup.GET("/listByDate/:orderBy", controller.listTicketByDate)
 	// protectedGroup.GET("/ticketListByDate/:dateTime", controller.tiketListByDate)

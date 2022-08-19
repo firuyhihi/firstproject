@@ -11,20 +11,6 @@ import (
 
 type TicketRepository interface {
 	Create(newTicket *model.Ticket) error
-	// ListByUser(user string) ([]model.Ticket, error)
-	// ListByDate(userId, orderBy string) ([]model.Ticket, error)
-	// ListByCategory(userId, category string) ([]model.Ticket, error)
-	// ListByPriority(userId, priority string) ([]model.Ticket, error)
-
-	// FilterByDate(userId string, startDate, endDate time.Time) ([]model.Ticket, error)
-
-	// GetById(ticketId string) (model.Ticket, error)
-	// GetTotalOpen(ticketId string) (int64, error)
-	// GetTotalClose(ticketId string) (int64, error)
-	// GetTotalProgress(ticketId string) (int64, error)
-
-	// UpdatePIC(ticket *model.JsonTicket, userId string) error
-
 	FindBy(by map[string]interface{}) (model.Ticket, error)
 	FindAllBy(by map[string]interface{}) ([]model.Ticket, error)
 	FindAll() ([]model.Ticket, error)
@@ -210,15 +196,6 @@ func (m *ticketRepository) Create(newTicket *model.Ticket) error {
 // 		return 0, fmt.Errorf("komplain dengan id %v tidak ditemukan", ticketId)
 // 	}
 // 	return count, nil
-// }
-
-// func (t *ticketRepository) UpdatePIC(ticket *model.JsonTicket, userId string) error {
-// 	err := t.db.Model(model.Ticket{}).Where("ticket_id = ?", ticket.ID).Update("pic", model.Pic{UserId: userId}).Error
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
 // }
 
 func NewTicketRepository(db *gorm.DB) TicketRepository {
