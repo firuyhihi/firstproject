@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 
 	"ticket.narindo.com/model"
 	"ticket.narindo.com/repository"
@@ -13,19 +14,24 @@ type TicketUseCase interface {
 	ListByUser(userRole *model.UserRole) ([]model.Ticket, error)
 	ListByDepartment(departmentId int) ([]model.Ticket, error)
 
+	GetById(ticketId string) (model.Ticket, error)
+
+	UpdatePIC(ticketId string, picId int) error
+	UpdateStatus(ticketId string, statusId int) error
+
+	GetTicketStatus(ticketId string) (model.Ticket, error)
+	GetTicketList() ([]model.Ticket, error)
+	GetNotificationList() ([]model.Ticket, error)
+	GetTicketSummary() ([]model.Ticket, error)
+
 	// ListByDate(userId, orderBy string) ([]model.Ticket, error)
 	// ListByPriority(userId, priority string) ([]model.Ticket, error)
 	// ListByCategory(userId, category string) ([]model.Ticket, error)
 
 	// FilterByDate(userId string, startDate, endDate time.Time) ([]model.Ticket, error)
-
-	GetById(ticketId string) (model.Ticket, error)
 	// GetTotalOpen(userId string) (int64, error)
 	// GetTotalClose(userId string) (int64, error)
 	// GetTotalProgress(userId string) (int64, error)
-
-	UpdatePIC(ticketId string, picId int) error
-	UpdateStatus(ticketId string, statusId int) error
 }
 
 type ticketUseCase struct {
@@ -36,33 +42,55 @@ type ticketUseCase struct {
 
 func (t *ticketUseCase) ListByDepartment(departmentId int) ([]model.Ticket, error) {
 	ticketList, err := t.repo.FindAllBy(map[string]interface{}{"department_id": departmentId, "status_id": 1})
-		if err != nil {
-			return []model.Ticket{}, err
-		}
-		return ticketList, nil
+	if err != nil {
+		return []model.Ticket{}, err
+	}
+	return ticketList, nil
 }
 
 func (t *ticketUseCase) CreateTicket(ticket *model.Ticket) error {
+	var tocheck = make(map[string]string)
+	tocheck["TicketSubject"] = ticket.TicketSubject
+	tocheck["TicketMessage"] = ticket.TicketMessage
+	tocheck["CsId"] = ticket.CsId
+
+	rescheck := utils.CheckEmptyStringRequest(tocheck)
+	if rescheck != "" {
+		return fmt.Errorf("create failed, missing required field %v", rescheck)
+	}
+
 	if ticket.CsId == "" || ticket.DepartmentId == 0 || ticket.TicketSubject == "" || ticket.TicketMessage == "" {
 		return errors.New("create failed, missing required field")
 	}
 	// status, cs, priority
-	department, _ := t.repoDept.FindAllBy(map[string]interface{}{"id": ticket.DepartmentId})
+	department, err := t.repoDept.FindAllBy(map[string]interface{}{"id": ticket.DepartmentId})
+	if err != nil {
+		return errors.New("problem exists")
+	}
 	if len(department) == 0 {
 		return errors.New("create failed, departement not found")
 	} //tambahin cek
 
-	status, _ := t.repo.FindAllBy(map[string]interface{}{"id": ticket.StatusId})
+	status, err := t.repo.FindAllBy(map[string]interface{}{"id": ticket.StatusId})
+	if err != nil {
+		return errors.New("problem exists")
+	}
 	if len(status) == 0 {
 		return errors.New("create failed, status not found")
 	}
 
-	csId, _ := t.repo.FindAllBy(map[string]interface{}{"id": ticket.CsId})
+	csId, err := t.repo.FindAllBy(map[string]interface{}{"id": ticket.CsId})
+	if err != nil {
+		return errors.New("problem exists")
+	}
 	if len(csId) == 0 {
 		return errors.New("create failed, cs id not found")
 	}
 
-	priority, _ := t.repo.FindAllBy(map[string]interface{}{"id": ticket.PriorityId})
+	priority, err := t.repo.FindAllBy(map[string]interface{}{"id": ticket.PriorityId})
+	if err != nil {
+		return errors.New("problem exists")
+	}
 	if len(priority) == 0 {
 		return errors.New("create failed, priority not found")
 	}
@@ -73,7 +101,7 @@ func (t *ticketUseCase) CreateTicket(ticket *model.Ticket) error {
 	ticket.StatusId = 1
 	ticket.IsActive = true
 
-	err := t.repo.Create(ticket)
+	err = t.repo.Create(ticket)
 
 	return err
 }
@@ -118,6 +146,22 @@ func (t *ticketUseCase) ListByUser(userRole *model.UserRole) ([]model.Ticket, er
 
 func (t *ticketUseCase) GetById(ticketId string) (model.Ticket, error) {
 	return t.repo.FindBy(map[string]interface{}{"ticket_id": ticketId})
+}
+
+func (t *ticketUseCase) GetTicketStatus(ticketId string) (model.Ticket, error) {
+	return t.repo.FindBy(map[string]interface{}{"ticket_id": ticketId})
+}
+
+func (t *ticketUseCase) GetTicketList() ([]model.Ticket, error) {
+	return t.repo.FindAllBy(map[string]interface{}{"ticket_id": ""})
+}
+
+func (t *ticketUseCase) GetNotificationList() ([]model.Ticket, error) {
+	return t.repo.FindAllBy(map[string]interface{}{"ticket_id": ""})
+}
+
+func (t *ticketUseCase) GetTicketSummary() ([]model.Ticket, error) {
+	return t.repo.FindAllBy(map[string]interface{}{"ticket_id": ""})
 }
 
 // func (t *ticketUseCase) GetTotalOpen(ticketId string) (int64, error) {

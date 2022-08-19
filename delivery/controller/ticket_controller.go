@@ -277,7 +277,7 @@ func (t *TicketController) updatePIC(c *gin.Context) {
 func (t *TicketController) updateStatus(c *gin.Context) {
 	var updateInput struct {
 		TicketId string `json:"ticketId"`
-		StatusId    int    `json:"statusId"`
+		StatusId int    `json:"statusId"`
 	}
 
 	if err := c.BindJSON(&updateInput); err != nil {
@@ -302,6 +302,105 @@ func (t *TicketController) updateStatus(c *gin.Context) {
 	}
 }
 
+func (t *TicketController) getTicketStatus(c *gin.Context) {
+	ticketId := c.Param("id")
+
+	ticket, err := t.ucTicket.GetTicketStatus(ticketId)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"status":  "FAILED",
+				"message": "Error ticket not found",
+			})
+			return
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"status":  "FAILED",
+			"message": err,
+		})
+		return
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "SUCCESS",
+		"message": ticket.Status.StatusName,
+	})
+
+}
+
+func (t *TicketController) getTicketList(c *gin.Context) {
+	ticket, err := t.ucTicket.GetTicketList()
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"status":  "FAILED",
+				"message": "Error ticket not found",
+			})
+			return
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"status":  "FAILED",
+			"message": err,
+		})
+		return
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "SUCCESS",
+		"message": ticket,
+	})
+}
+
+func (t *TicketController) getNotificationList(c *gin.Context) {
+	ticket, err := t.ucTicket.GetNotificationList()
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"status":  "FAILED",
+				"message": "Error ticket not found",
+			})
+			return
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"status":  "FAILED",
+			"message": err,
+		})
+		return
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "SUCCESS",
+		"message": ticket,
+	})
+}
+
+func (t *TicketController) getTicketSummary(c *gin.Context) {
+	ticket, err := t.ucTicket.GetTicketSummary()
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"status":  "FAILED",
+				"message": "Error ticket not found",
+			})
+			return
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"status":  "FAILED",
+			"message": err,
+		})
+		return
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "SUCCESS",
+		"message": ticket,
+	})
+}
+
 func NewTicketController(router *gin.Engine, ucTicket usecase.TicketUseCase) *TicketController {
 	controller := TicketController{
 		router:   router,
@@ -316,17 +415,21 @@ func NewTicketController(router *gin.Engine, ucTicket usecase.TicketUseCase) *Ti
 	protectedGroup.GET("/list", controller.ListTicketByUserId)
 	protectedGroup.GET("/department/:id", controller.ListTicketByDepartmentId)
 
+	protectedGroup.PUT("/update-pic", controller.updatePIC)
+	protectedGroup.PUT("/update-status", controller.updateStatus)
+
+	protectedGroup.GET("/:id", controller.getTicketById)
+	protectedGroup.GET("/status/:id", controller.getTicketStatus)
+	protectedGroup.GET("/list", controller.getTicketList)
+	protectedGroup.GET("/notification/list", controller.getNotificationList)
+	protectedGroup.GET("/summary", controller.getTicketSummary)
+
 	// protectedGroup.GET("/listByDate/:orderBy", controller.listTicketByDate)
 	// protectedGroup.GET("/ticketListByDate/:dateTime", controller.tiketListByDate)
 	// protectedGroup.GET("/listByPriority/:priority", controller.listTicketByPriority)
 	// protectedGroup.GET("/listByCategory/:category", controller.listTicketByCategory)
 
-	protectedGroup.PUT("/update-pic", controller.updatePIC)
-	protectedGroup.PUT("/update-status", controller.updateStatus)
-
 	// protectedGroup.GET("/filterByDate/:startDate/:endDate", controller.filterTicketByDate)
-
-	protectedGroup.GET("/:id", controller.getTicketById)
 	// protectedGroup.GET("/getTotalOpen", controller.getTotalOpenTicket)
 	// protectedGroup.GET("/getTotalClose", controller.getTotalCloseTicket)
 	// protectedGroup.GET("/getTotalProgress", controller.getTotalOnProgressTicket)
